@@ -1,0 +1,27 @@
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.query
+
+Class PaginatorMSSQL
+    Public Method New()
+    Public Method GetPaginateSql(cQuery, cOrderBy, nPage, nPageSize)
+    Public Method LogRegData(cField)
+EndClass
+
+Method New() Class PaginatorMSSQL
+Return(self)
+
+Method GetPaginateSql(cQuery, cOrderBy, nPage, nPageSize) Class PaginatorMSSQL
+    Local cSql := cQuery
+    Local nInicialValue := (nPage - 1) * nPageSize
+    Local cOffSet := " OFFSET " + cValToChar(nInicialValue) + " ROWS FETCH NEXT " + cValToChar(nPageSize) + " ROWS ONLY"
+
+    cOrderBy := IIF(Empty(cOrderBy), "1", cOrderBy)
+
+    cSql += " ORDER BY " + cOrderBy + cOffSet
+Return(cSql)
+
+Method LogRegData(cField) Class PaginatorMSSQL
+    Local cSql := "CONVERT(NCHAR(8), CAST(DATEADD(DAY, CONVERT(INT, Convert(nvarchar(50),(ASCII(SUBSTRING(" + cField + ",12,1)) - 50))+Convert(nvarchar(50),(ASCII(SUBSTRING(" + cField + ",16,1)) - 50))),'1996-01-01') AS DATETIME),112)"
+    cSql := "(CASE WHEN "+ cField +" <> ' ' THEN (" + cSql + ") ELSE SPACE(10) END)"
+Return(cSql)

@@ -1,0 +1,41 @@
+
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.dao
+
+Class AbstractDao
+
+    Public Data cAlias as Character
+    Public Data cPrefixo as Character
+
+    Public Method New(cAlias)
+    Public Method SetAlias(cAlias)
+    Public Method ExisteCpo(cChave, nIndex)
+EndClass
+
+Method New(cAlias) Class AbstractDao
+    self:cAlias := cAlias
+    self:cPrefixo := PrefixoCpo(cAlias)
+Return(self)
+
+Method SetAlias(cAlias) Class AbstractDao
+    self:cAlias := cAlias
+    self:cPrefixo := PrefixoCpo(cAlias)
+Return(self)
+
+Method ExisteCpo(cChave, nIndex) Class AbstractDao
+    Local cFilCpo := self:cPrefixo + "_FILIAL"
+    Local cKey := ""
+    Local lFilFilial := .T.
+    
+    DbSelectArea(self:cAlias)
+    (self:cAlias)->( DbSetOrder(nIndex) )
+    
+    cKey := (self:cAlias)->(IndexKey())
+    lFilFilial := StrTokArr(cKey,"+")[1] == cFilCpo
+
+    If lFilFilial
+        cChave := xFilial(self:cAlias) + cChave
+    EndIf
+
+Return((self:cAlias)->(DbSeek( cChave , .F. )))

@@ -1,0 +1,89 @@
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.model
+
+Class AbstractErrorModel
+    Private Data aFields as array
+    Public Method New()
+
+    Public Method AddError(cField, cMesage)
+
+    Public Method GetErrors()
+    Public Method ErrorsArr()
+    Public Method ListFieldsErr()
+    Public Method GetFullMessage()
+    Public Method GetMessagesToJson()
+    Private Method GetErrorSentence(aErrors)
+EndClass
+
+Method New() Class AbstractErrorModel
+    self:aFields := {}
+Return(self)
+
+Method AddError(cField, cMesage) Class AbstractErrorModel
+    Local nPosField := aScan(self:aFields, { |aVet| aVet[1] == cField})
+
+    If nPosField == 0
+        aAdd(self:aFields, {cField, {}})
+        nPosField := Len(self:aFields)
+    EndIf
+
+    aAdd(self:aFields[nPosField, 2], cMesage)
+Return(self)
+
+Method ErrorsArr() Class AbstractErrorModel
+    Local aErrors := {}
+    Local nError := 0
+    Local nField := 1
+    For nField := 1 To Len(self:aFields)
+        For nError := 1 To Len(self:aFields[nField, 2])
+            aAdd(aErrors, {self:aFields[nField, 1], self:aFields[nField, 2, nError]})
+        Next
+    Next
+Return(aErrors)
+
+Method GetErrors() Class AbstractErrorModel
+Return(self:aFields)
+
+Method ListFieldsErr() Class AbstractErrorModel
+    Local aRet := {}
+    Local nField := 1
+    For nField := 1 To Len(self:aFields)
+        aAdd(aRet, {self:aFields[nField, 1]})
+    Next
+Return(aRet)
+
+Method GetFullMessage() Class AbstractErrorModel
+    Local cRet := ""
+    Local nField := 1
+    
+    For nField := 1 To Len(self:aFields)
+        cRet += IIF(nField == 1, "", CRLF) + self:aFields[nField, 1] + ": " + self:GetErrorSentence(self:aFields[nField, 2])
+    Next
+Return(cRet)
+
+Method GetMessagesToJson() Class AbstractErrorModel
+    Local cRet := ""
+    Local nField := 1
+    
+    For nField := 1 To Len(self:aFields)
+        cRet += IIF(nField == 1, '', ', ') + '"' + self:aFields[nField, 1] + '"' + ': ' + '"' + self:GetErrorSentence(self:aFields[nField, 2]) + '"'
+    Next
+Return("{" + cRet + "}")
+
+
+Method GetErrorSentence(aErrors) Class AbstractErrorModel
+    Local cRet := ""
+    Local nCount := Len(aErrors)
+    Local nError := 1
+
+    If nCount == 1
+        cRet := aErrors[1] + "."
+    ElseIf nCount > 0
+        For nError := 1 To nCount - 1            
+            cRet += IIF(nError > 1, ", ", "") + aErrors[nError]
+        Next
+        cRet += " e " + aTail(aErrors) + "."
+    EndIf
+
+Return(cRet)

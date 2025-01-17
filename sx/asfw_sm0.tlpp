@@ -1,0 +1,58 @@
+
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.sx
+
+User Function AsFwSM0()
+Return AsFwSM0():New()
+
+Class AsFwSM0
+    // Static Method Open()
+    Static Method GetCompanyId()
+    Static Method GetBranchId()
+    Static Method GetName()
+
+    Static Method SeekDoc(cSM0Doc, cSM0Cod, cSM0Fil, lPosiciona)
+    Static Method Seek(cEmpSeek, cFilSeek)
+EndClass
+
+Method GetCompanyId() Class AsFwSM0
+Return(SM0->M0_CODIGO)
+
+Method GetBranchId() Class AsFwSM0
+Return(SM0->M0_CODFIL)
+
+Method GetName() Class AsFwSM0
+Return(SM0->M0_NOME)
+
+Method Seek(cEmpSeek, cFilSeek) Class AsFwSM0
+    // DBSelectArea("SM0")
+    SM0->(DbSetOrder(1))
+Return(SM0->(DbSeek(cEmpSeek + cFilSeek)))
+
+
+Method SeekDoc(cSM0Doc, cSM0Cod, cSM0Fil, lPosiciona) Class AsFwSM0
+    Local aArea := GetArea()
+    Local aAreaSM0 := SM0->(GetArea())
+    Local lRet := .F.
+
+    Default lPosiciona := .F.
+
+    cSM0Cod := ""
+    cSM0Fil := ""
+
+    SM0->(DbGoTop())
+    While (!lRet .And. SM0->( !Eof() ))
+        If (lRet := SM0->M0_CGC == cSM0Doc)
+            cSM0Cod := SM0->M0_CODIGO
+            cSM0Fil := SM0->M0_CODFIL
+        Else
+            SM0->(DbSkip())
+        EndIf
+    EndDo
+
+    If !lPosiciona
+        RestArea(aAreaSM0)
+        RestArea(aArea)
+    EndIf
+Return(lRet)

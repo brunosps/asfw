@@ -1,0 +1,118 @@
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.query
+
+Class QueryBuilder
+    Private Data cQuery as Character
+    Private Data aFields as array
+    Private Data cFields as Character
+    Private Data aWhere as array
+    Private Data cWhere as Character
+    Private Data aOrder as array
+    Private Data cOrderBy as Character
+
+    Private Data cBlankFil as Character
+    
+    Private Data cAlias as Character
+    Private Data cTableName as Character
+    
+    Private Data cEmp as Character
+    Private Data cFil as Character
+
+    Public Method New()
+
+    Public Method AddField(cField)
+    Public Method SetFields(cFields)
+
+    Public Method Where(cField, xValue)
+    Public Method SetWhere(cWhere)
+    
+    Public Method AddOrderBy(cField)
+    Public Method SetOrderBy(cOrderBy)
+
+    Public Method Execute(lPaginate)
+
+    Public Method SetQuery(cQuery)
+    Public Method SetAlias(cAlias)
+
+    Private Method GetSql()    
+EndClass
+
+Method New() Class QueryBuilder
+    self:cQuery := ""
+    self:aFields := {}
+    self:cFields := ""
+    self:aWhere := {}
+    self:cWhere := ""
+    self:aOrder := {}
+    self:cOrderBy := ""
+
+    self:cBlankFil := Space(FWGETTAMFILIAL)
+
+    self:cAlias := ""
+    self:cTableName := ""
+    self:cFil := AsFwSM0():GetBranchId()
+    self:cEmp := AsFwSM0():GetCompanyId()
+Return(self)
+
+Method SetAlias(cAlias) Class QueryBuilder
+
+Return(self)
+
+Method Where(cField, xValue) Class QueryBuilder
+    aAdd(self:aWhere, {cField, xValue})
+Return(self)
+
+Method SetWhere(cWhere) Class QueryBuilder
+    self:cWhere := cWhere
+Return(self)
+
+Method AddField(cField) Class QueryBuilder
+    aAdd(self:aFields, cField)
+Return(self)
+
+Method SetFields(cFields) Class QueryBuilder
+    self:cFields := cFields
+Return(self)
+
+Method AddOrderBy(cField) Class QueryBuilder
+    aAdd(self:aOrder, cField)
+Return(self)
+
+Method SetOrderBy(cOrderBy) Class QueryBuilder
+    self:cOrderBy := cOrderBy
+Return(self)
+
+Method SetQuery(cQuery) Class QueryBuilder
+    self:cQuery := cQuery
+Return(self)
+
+Method GetSql() Class QueryBuilder
+    Local nI := 1
+
+    If !Empty(self:cQuery)
+        Return(self:cQuery)
+    EndIf
+
+    If Empty(self:cFields)
+        For nI := 1 To Len(self:aFields)
+            self:cFields += IIF(nI == 1, "", ", ") + self:aFields[nI]
+        Next
+    EndIf
+
+
+    If Empty(self:cWhere)
+        For nI := 1 To Len(self:aWhere)
+            self:cWhere += IIF(nI == 1, "", " AND ") + self:aFields[nI]
+        Next
+
+        self:cWhere
+    EndIf
+
+Return(cSql)
+
+Method Execute(lPaginate) Class QueryBuilder
+    Default lPaginate := .F.
+
+
+Return(self)

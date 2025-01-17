@@ -1,0 +1,96 @@
+
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.controller
+
+Class AbstractController
+    Public Data STATUSOK as Character
+    Public Data STATUSERR as Character
+
+    Protected Data oRest as object
+
+    Public Method New(oRest)
+    Public Method GetBodyContent()
+    Public Method GetContent()
+
+    Public Method SetResponse(oData)
+
+    Protected Method SetRestConfig()
+    Protected Method FromJsonStr(cJson)
+    Protected Method ErrBlock( e )
+
+End Class
+
+Method New(oRest) Class AbstractController
+    self:oRest = oRest
+    
+    self:STATUSOK := "OK"
+    self:STATUSERR := "ERROR"
+
+    // bBlock := ErrorBlock( { |e| self:ErrBlock( e, self ), Ms_Quit() } )
+    // self:oRest:SetOnError({ |e| self:ErrBlock( e, self ) })
+
+    self:SetRestConfig()
+Return self
+
+Method ErrBlock( e ) Class AbstractController
+    Local oResponse := JSONObject():New()
+
+    oResponse['STATUS'] := self:STATUSERR
+    oResponse['ERROR'] := e:Description
+    
+    self:oRest:setStatus(500)
+    self:oRest:setResponse(ClassMethArr(self:oRest, .T.))
+
+    REST_EXIT()
+Return(.T.)
+
+Method GetBodyContent() Class AbstractController
+    Local oJson := JsonObject():New()
+    Local cBody := self:GetContent()
+    
+    If !Empty(cBody)
+        oJson := self:FromJsonStr(cBody)
+    EndIf
+Return oJson
+
+Method GetContent() Class AbstractController
+Return(self:oRest:GetContent())
+
+Method FromJsonStr(cJson) Class AbstractController
+    Local oJson := Nil
+
+	If ValType( cJson ) <> "C"
+		cJson := ""
+	EndIf
+
+	cRet := FwNoAccent(cJson)
+
+    If !FWJsonDeserialize(cJson, @oJson)
+		oJson := Nil
+	EndIf
+
+Return(oJson)
+
+/**
+    Protected Method
+ */
+Method SetRestConfig() Class AbstractController
+    self:oRest:SetContentType("application/json; charset=iso-8859-1; charset=cp1252")
+Return self
+
+Method SetResponse(oResponse) Class AbstractController
+    Local nHttpCode := 200
+
+    If u_AsHasData(oResponse, "HttpCode")
+        nHttpCode := oResponse:HttpCode
+    EndIf
+
+    If u_AsHasMeth(oResponse, "ToJson")
+        oResponse := EncodeUTF8(FWJsonSerialize(oResponse:ToJson(), .F.), "cp1252")
+    EndIf
+
+    self:oRest:SetContentType("application/json; charset=iso-8859-1")
+    self:oRest:setStatus(nHttpCode)
+    self:oRest:setResponse(oResponse)
+Return(.T.)

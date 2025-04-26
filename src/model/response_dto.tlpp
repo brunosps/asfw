@@ -1,0 +1,39 @@
+
+#INCLUDE "TOTVS.CH"
+#INCLUDE "ASFWMODEL.CH"
+
+namespace asfw.model
+
+Class ResponseDto From asfw.model.AbstractModel 
+  Public Data status As Character
+  Public Data data As object
+  Public Data mensagem As Character
+  Public Data httpCode As integer
+
+  Public Method New(cStatus, xData, cMensagem, nHttpCode)
+  Public Method GetPropertyMapper()
+EndClass
+
+Method New(cStatus, xData, cMensagem, nHttpCode) Class ResponseDto
+
+  Default xData := JSONObject():New()
+  Default cMensagem := ""
+  Default nHttpCode := 200
+
+  _Super:New()
+
+  self:status := cStatus
+  self:data := xData
+  self:mensagem := cMensagem
+  self:httpCode := nHttpCode
+
+Return(self)
+
+Method GetPropertyMapper() Class ResponseDto
+    Local oRet := JsonObject():New()
+
+    oRet["status"] := "status"
+    oRet["data"] := "data"
+    oRet["mensagem"] := "mensagem"
+
+Return(oRet)

@@ -1,0 +1,109 @@
+
+#INCLUDE "TOTVS.CH"
+
+namespace asfw.sx
+
+User Function AsFwSX3()
+Return AsFwSX3():New()
+
+Class AsFwSX3
+    Static Method GetField(cField)
+    Static Method GetMeta(cField)
+    Static Method FieldExists(cField)
+    Static Method GetMetaOptions(oOptions)
+EndClass
+
+Method FieldExists(cField) Class AsFwSX3
+    Local aArea := FwGetArea()
+    Local lRet := .F.
+
+    DbSelectArea("SX3")
+    SX3->(DbSetOrder(2))
+
+    lRet := SX3->(DbSeek(cField))
+
+    FwRestArea(aArea)
+Return(lRet)
+
+Method GetField(cField) Class AsFwSX3
+    Local aArea := FwGetArea()
+    Local oRet := Nil
+    Local nAux := 1
+    Local oX3CBox := Nil
+
+    DbSelectArea("SX3")
+    SX3->(DbSetOrder(2))
+
+    If SX3->(!DbSeek(cField))
+        Return(oRet)
+    EndIf
+
+    oRet := JsonObject():New()
+
+    oRet['X3_TITULO']  := AllTrim(SX3->(X3Titulo()))
+    oRet['X3_CAMPO']   := AllTrim(SX3->X3_CAMPO)
+    oRet['X3_PICTURE'] := AllTrim(SX3->X3_PICTURE)
+    oRet['X3_TAMANHO'] := SX3->X3_TAMANHO
+    oRet['X3_DECIMAL'] := SX3->X3_DECIMAL
+    oRet['X3_VALID']   := AllTrim(SX3->X3_VALID)
+    oRet['X3_USADO']   := X3USO(SX3->X3_USADO) //AllTrim(SX3->X3_USADO)
+    oRet['X3_TIPO']    := AllTrim(SX3->X3_TIPO)
+    oRet['X3_F3']      := AllTrim(SX3->X3_F3)
+    oRet['X3_CONTEXT'] := AllTrim(SX3->X3_CONTEXT)
+    
+    If !Empty(SX3->(X3Cbox()))
+        oX3CBox := JsonObject():New()
+        aAux := StrTokArr(SX3->(X3Cbox()), ';')
+        For nAux := 1 To Len(aAux)
+            oX3CBox[AllTrim(StrToKArr(aAux[nAux], '=')[1])] = AllTrim(StrToKArr(aAux[nAux], '=')[2])
+        Next
+    EndIf
+
+    oRet['X3_CBOX']    := oX3CBox
+    oRet['X3_RELACAO'] := AllTrim(SX3->X3_RELACAO)
+    oRet['X3_WHEN']    := AllTrim(SX3->X3_WHEN)
+
+	
+    FwRestArea(aArea)
+Return(oRet)
+
+Method GetMeta(cField) Class AsFwSX3
+    Local oField := AsFwSX3():GetField(cField)
+    Local oMeta := JsonObject():New()
+    Local cType := "string"
+
+    If oField['X3_TIPO'] == 'D'
+        cType := 'date'
+    ElseIf oField['X3_TIPO'] == 'N'
+        If oField['X3_DECIMAL'] > 0
+            cType := 'currency'
+        Else
+            cType := 'number'
+        EndIf
+    EndIf
+
+    oMeta['property'] := oField['X3_CAMPO']
+    oMeta['label'] := EnCodeUtf8(NoAcento(oField['X3_TITULO']))
+    oMeta['type'] := cType
+
+    If oField['X3_CBOX'] != Nil
+        oMeta['options'] := AsFwSX3():GetMetaOptions(oField['X3_CBOX'])
+    EndIf
+
+Return(oMeta)
+
+Method GetMetaOptions(oOptions) Class AsFwSX3
+    Local aRet := {}
+    Local aOptions := oOptions:GetNames()
+    Local nOption := 1
+    Local oRet := JsonObject():New()
+
+    For nOption := 1 To Len(aOptions)
+        oRet := JsonObject():New()
+        oRet['value'] := aOptions[nOption]
+        oRet['label'] := oOptions[aOptions[nOption]]
+
+        aAdd(aRet, oRet)
+    Next
+
+Return(aRet)

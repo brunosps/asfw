@@ -1,0 +1,32 @@
+
+#INCLUDE "TOTVS.CH"
+
+User Function AsResponseDto(cStatus, xData, cMensagem, nHttpCode)
+	Local oResponse := asfw.model.ResponseDto():New(cStatus, xData, cMensagem, nHttpCode)
+Return(oResponse)
+
+User Function AsHasMeth(oObject, cValue)
+Return(AScan(ClassMethArr(oObject, .T.),{ |aVet| aVet[1] == Upper(cValue) }) > 0)
+
+User Function AsHasData(oObject, cValue)
+Return(AScan(ClassDataArr(oObject, .T.),{ |aVet| aVet[1] == Upper(cValue) }) > 0)
+
+User Function AsConvData(dAData, cMask)
+	Local cData := ""
+	Default dAData := Date()
+	If Empty(dAData)
+		dAData := Date()
+	Endif
+	cData := TransForm(DTos(dAData), cMask)
+Return ( cData )
+
+User Function AsEmpty(xValue)
+	Local lEmpty := .F.
+
+	If xValue <> Nil .And. (ValType(xValue) == "O" .Or. ValType(xValue) == "J")
+		lEmpty := Empty(ClassDataArr(xValue, .T.))
+	Else
+		lEmpty := Empty(xValue)
+	EndIf
+
+Return(lEmpty)

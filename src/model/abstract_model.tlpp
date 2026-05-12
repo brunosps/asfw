@@ -1,4 +1,5 @@
 #INCLUDE "TOTVS.CH"
+#INCLUDE "TRYEXCEPTION.CH"
 
 namespace asfw.model
 
@@ -79,9 +80,11 @@ Return(self:FromJson(oJson))
 
 Method FromJson(oJson) Class AbstractModel
     Local aData := ClassDataArr(self)
-    Local aDataJson := ClassDataArr(oJson, .T.)
+    Local aDataJson := {}
+    Local aJsonNames := JsonNames(oJson)
     Local nData := 1
     Local nPosProp := 0
+    Local cJsonKey := ""
 
     Private oRet := self
 
@@ -89,16 +92,49 @@ Method FromJson(oJson) Class AbstractModel
         Return(oJson)
     EndIf
 
+    If Empty(aJsonNames)
+        aDataJson := ClassDataArr(oJson, .T.)
+    EndIf
+
     For nData := 1 To Len(aData)
-        nPosProp := aScan(aDataJson,{|x| Upper(AllTrim(x[1])) == Upper(AllTrim(aData[nData, 1]))})
-        If  nPosProp == 0
+        cJsonKey := ""
+
+        If !Empty(aJsonNames)
+            nPosProp := AScan(aJsonNames, { |cKey| Upper(AllTrim(cKey)) == Upper(AllTrim(aData[nData, 1])) })
+            If nPosProp > 0
+                cJsonKey := aJsonNames[nPosProp]
+            EndIf
+        Else
+            nPosProp := AScan(aDataJson, { |x| Upper(AllTrim(x[1])) == Upper(AllTrim(aData[nData, 1])) })
+            If nPosProp > 0
+                cJsonKey := aDataJson[nPosProp, 1]
+            EndIf
+        EndIf
+
+        If Empty(cJsonKey)
             Loop
         EndIf
 
-        oRet:Set(aData[nData, 1], oJson[aDataJson[nPosProp, 1]])
+        oRet:Set(aData[nData, 1], oJson[cJsonKey])
     Next
 
 Return(oRet)
+
+Static Function JsonNames(oJson)
+    Local aRet := {}
+    Local oError := Nil
+
+    If !(ValType(oJson) $ "O/J")
+        Return(aRet)
+    EndIf
+
+    TRYEXCEPTION
+        aRet := oJson:GetNames()
+    CATCHEXCEPTION USING oError
+        aRet := {}
+    ENDEXCEPTION
+
+Return(aRet)
 
 Method ClassName() Class AbstractModel
     Local aMeth := ClassMethArr(self, .T.)

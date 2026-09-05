@@ -1,0 +1,36 @@
+{
+    "files.encoding": "windows1252",
+    "workbench.iconTheme": "vscode-icons",
+    "[advpl]": {
+        "editor.defaultFormatter": "KillerAll.advpl-vscode"
+    },
+    "advpl.environments": [ //Array com os ambientes configurados  
+        {
+            "name": "R2310-LOCAL",
+            "environment": "DEV",
+            "serverVersion": "210324P", //131227A, 170117A e 191205P
+            "server": "localhost",
+            "port": "1234",
+            "user": "admin",
+            "passwordCipher": "de1v8Fq36NCQS9vX6AZkIiAdlVGuTKAzJrNs91Jli6NNvUbhozjyboLUom+skIk+AAXMEHhWVAdaeSWKAImkSB9/=",
+            "includeList": "/opt/totvs/includes",
+            "totvs_language": "advpl",
+            "enable": true,
+            "defragPackAllInfo": true,
+            "ssl": true
+        },
+    ], // Caso esteja como true, força recompilar os fontes mesmo que não tiveram alteração.
+    "advpl.compile_threads": 4,
+    "advpl.pathPatchBuild": "/home/bruno/totvs/patchs/",
+    "advpl.debug_showPrivates": true,
+    "advpl.debug_showPublic": true,
+    "editor.minimap.enabled": false,
+    "advpl.debug_multiThread": false,
+    "advpl.alpha_compile": true, // Numero de Threads que serão utilizadas quando se compila uma Folder, o padrão é 4. Aumentar para mais de 4 Threads, fara o uso de CPU ficar bem alto
+    "advpl.logger": true,
+    "advpl.compile_force_recompile": true,
+    "advpl.selectedEnvironment": "R2310-LOCAL",
+    "advpl.workspaceFolders": "/home/bruno/totvs/projects/asfw;",
+    "totvsLanguageServer.welcomePage": false,
+    "totvsLanguageServer.editor.linter.includes": "/opt/totvs/includes",
+}
